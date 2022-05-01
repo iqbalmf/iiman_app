@@ -18,7 +18,26 @@ if (flutterVersionCode == null) {
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
+    flutterVersionName = '1.0.0'
+}
+
+def flutterCompileSdkVersion = localProperties.getProperty('flutter.compileSdkVersion').toInteger()
+if (flutterCompileSdkVersion == null){
+    flutterCompileSdkVersion = 30
+}
+
+def flutterMinSdkVersion = localProperties.getProperty('flutter.minSdkVersion').toInteger()
+if (flutterMinSdkVersion == null){
+    flutterMinSdkVersion = 16
+}
+def flutterTargetSdkVersion = localProperties.getProperty('flutter.targetSdkVersion').toInteger()
+if (flutterMinSdkVersion == null){
+    flutterMinSdkVersion = 30
+}
+
+def flutterApplicationId = localProperties.getProperty('flutter.applicationsId')
+if (flutterMinSdkVersion == null){
+    flutterMinSdkVersion = "net.iqbalfauzan.iimanapp"
 }
 
 apply plugin: 'com.android.application'
@@ -26,7 +45,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion flutterCompileSdkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -43,9 +62,9 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "net.iqbalfauzan.iimanapp"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        applicationId flutterApplicationId
+        minSdkVersion flutterMinSdkVersion
+        targetSdkVersion flutterTargetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -54,7 +73,36 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
+            debuggable false
             signingConfig signingConfigs.debug
+        }
+        debug{
+            debuggable true
+            applicationIdSuffix ".debug"
+            signingConfig signingConfigs.debug
+        }
+    }
+    flavorDimensions "version"
+    productFlavors {
+        dev {
+            dimension "version"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+        prod {
+            dimension "version"
+            applicationIdSuffix ".prod"
+            versionNameSuffix "-prod"
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            if (variant.buildType.name == "debug") {
+                outputFileName = "iimanapp_v$flutterVersionName($flutterVersionCode)_develop.apk"
+            } else {
+                outputFileName = "iimanapp_v$flutterVersionName($flutterVersionCode).apk"
+            }
         }
     }
 }
